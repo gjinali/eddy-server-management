@@ -171,19 +171,13 @@ class Server extends Model
         return $this;
     }
 
-   /**
-    * Returns a signed URL that containts the script to connect a custom server to the app.
-    */
-   public function provisionScriptUrl(): string
-   {
-       $host = rtrim(config('eddy.webhook_url') ?: config('app.url'), '/');
-
-       return $host.URL::signedRoute(
-           name: 'servers.provisionScript',
-           parameters: ['server' => $this],
-           absolute: false
-       );
-   }
+    /**
+     * Returns a signed URL that containts the script to connect a custom server to the app.
+     */
+    public function provisionScriptUrl(): string
+    {
+        return URL::relativeSignedRoute('servers.provision-script', ['server' => $this]);
+    }
 
     /**
      * A bash provision command used to start the provision of custom servers.
@@ -351,6 +345,12 @@ class Server extends Model
     public function sites(): HasMany
     {
         return $this->hasMany(Site::class);
+    }
+
+    public function backups(): HasMany
+    {
+        return $this->hasMany(Backup::class)
+            ->orderBy((new Backup)->qualifyColumn('name'));
     }
 
     public function crons(): HasMany
